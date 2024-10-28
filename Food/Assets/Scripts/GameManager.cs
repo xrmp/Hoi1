@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour
     private int autoIncomeCount = 0; // Счетчик улучшений автоматического дохода
     private int currentFoodHP; // Текущее HP еды
     private GameObject currentFood; // Ссылка на текущий объект еды
+    private bool autoIncomePurchased = false; // Флаг, показывает, куплен ли авто доход
+    private float foodMultiplier = 1; // Множитель еды
 
     [SerializeField] private GameObject[] foodPrefabs; // Массив префабов еды
 
@@ -27,7 +29,6 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             currentFoodHP = initialFoodHP; // Устанавливаем начальное HP при старте
             SpawnFood(); // Спавним первую еду при старте игры
-            StartCoroutine(AutoIncomeCoroutine()); // Запускаем корутину автоматического дохода
         }
         else
         {
@@ -37,14 +38,14 @@ public class GameManager : MonoBehaviour
 
     public void AddFood(int amount)
     {
-        food += amount; // Увеличиваем еду
+        food += (int)(amount * foodMultiplier); // Увеличиваем еду с учетом множителя
     }
 
     private IEnumerator AutoIncomeCoroutine()
     {
         while (true)
         {
-            yield return new WaitForSeconds(10); // Ждем 1 секунду
+            yield return new WaitForSeconds(1); // Ждем 1 секунду
             AddFood(autoIncome); // Добавляем автоматический доход
         }
     }
@@ -119,6 +120,13 @@ public class GameManager : MonoBehaviour
             autoIncome *= 2; // Увеличиваем автоматический доход
             autoIncomeCount++; // Увеличиваем счетчик автоматического дохода
             autoIncomeUpgradeCost *= 2; // Увеличиваем стоимость следующего улучшения
+
+            if (!autoIncomePurchased)
+            {
+                autoIncomePurchased = true; // Устанавливаем флаг
+                StartCoroutine(AutoIncomeCoroutine()); // Запускаем корутину авто дохода
+            }
+
             return true; // Успешное улучшение
         }
         return false; // Не удалось улучшить
@@ -126,13 +134,11 @@ public class GameManager : MonoBehaviour
 
     public bool UpgradeFoodMultiplier()
     {
-        // Здесь можно добавить логику, например, увеличивать количество еды, получаемое с клика
         if (food >= foodMultiplierUpgradeCost)
         {
             food -= foodMultiplierUpgradeCost; // Уменьшаем еду на стоимость
+            foodMultiplier *= 2; // Увеличиваем множитель еды
             foodMultiplierUpgradeCost *= 2; // Увеличиваем стоимость следующего улучшения
-            // Например, увеличиваем количество еды, получаемое при клике
-            // Здесь нужно добавить соответствующую логику, если требуется
             return true; // Успешное улучшение
         }
         return false; // Не удалось улучшить
