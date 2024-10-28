@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +5,7 @@ public class Shop : MonoBehaviour
 {
     [SerializeField] private Text foodAmountText; // Текст для отображения количества еды
     [SerializeField] private Text clickDamageCostText; // Текст для отображения стоимости улучшения урона за клик
-    [SerializeField] private Text autoClickCostText; // Текст для отображения стоимости автоматического клика
+    [SerializeField] private Text autoIncomeCostText; // Текст для отображения стоимости улучшения автоматического дохода
     [SerializeField] private Text foodMultiplierCostText; // Текст для отображения стоимости увеличения еды
 
     private void Start()
@@ -15,11 +13,20 @@ public class Shop : MonoBehaviour
         UpdateShopUI(); // Обновляем UI магазина при старте
     }
 
-    private void UpdateShopUI()
+    private void Update()
+    {
+        UpdateFoodAmountText(); // Обновляем только количество еды
+    }
+
+    private void UpdateFoodAmountText()
     {
         foodAmountText.text = "Food: " + GameManager.Instance.GetFood();
+    }
+
+    public void UpdateShopUI()
+    {
         clickDamageCostText.text = "Upgrade Click Damage: " + GameManager.Instance.GetClickDamageUpgradeCost();
-        autoClickCostText.text = "Upgrade Auto Click: " + GameManager.Instance.GetAutoClickUpgradeCost();
+        autoIncomeCostText.text = "Upgrade Auto Income: " + GameManager.Instance.GetAutoIncomeUpgradeCost();
         foodMultiplierCostText.text = "Upgrade Food Multiplier: " + GameManager.Instance.GetFoodMultiplierUpgradeCost();
     }
 
@@ -31,9 +38,9 @@ public class Shop : MonoBehaviour
         }
     }
 
-    public void BuyAutoClickUpgrade()
+    public void BuyAutoIncomeUpgrade()
     {
-        if (GameManager.Instance.UpgradeAutoClick())
+        if (GameManager.Instance.UpgradeAutoIncome())
         {
             UpdateShopUI(); // Обновляем UI после успешной покупки
         }

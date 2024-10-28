@@ -8,12 +8,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int food; // Количество еды
     [SerializeField] private int damage = 1; // Начальный урон
     [SerializeField] private int clickDamageUpgradeCost = 1; // Стоимость улучшения урона за клик
-    [SerializeField] private int autoClickUpgradeCost = 2; // Стоимость автоматического клика
+    [SerializeField] private int autoIncomeUpgradeCost = 2; // Стоимость улучшения автоматического дохода
     [SerializeField] private int foodMultiplierUpgradeCost = 2; // Стоимость увеличения еды
-
     [SerializeField] private int initialFoodHP = 10; // Начальное HP еды
 
-    private int autoClickCount = 0; // Сколько раз куплен автоматический клик
+    private int autoIncome = 1; // Начальный автоматический доход
+    private int autoIncomeCount = 0; // Счетчик улучшений автоматического дохода
     private int currentFoodHP; // Текущее HP еды
     private GameObject currentFood; // Ссылка на текущий объект еды
 
@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             currentFoodHP = initialFoodHP; // Устанавливаем начальное HP при старте
             SpawnFood(); // Спавним первую еду при старте игры
+            StartCoroutine(AutoIncomeCoroutine()); // Запускаем корутину автоматического дохода
         }
         else
         {
@@ -36,7 +37,16 @@ public class GameManager : MonoBehaviour
 
     public void AddFood(int amount)
     {
-        food += amount; // Добавляем еду
+        food += amount; // Увеличиваем еду
+    }
+
+    private IEnumerator AutoIncomeCoroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(10); // Ждем 1 секунду
+            AddFood(autoIncome); // Добавляем автоматический доход
+        }
     }
 
     public int GetFood()
@@ -54,9 +64,9 @@ public class GameManager : MonoBehaviour
         return clickDamageUpgradeCost; // Возвращаем стоимость улучшения урона за клик
     }
 
-    public int GetAutoClickUpgradeCost()
+    public int GetAutoIncomeUpgradeCost()
     {
-        return autoClickUpgradeCost; // Возвращаем стоимость автоматического клика
+        return autoIncomeUpgradeCost; // Возвращаем стоимость улучшения автоматического дохода
     }
 
     public int GetFoodMultiplierUpgradeCost()
@@ -77,7 +87,6 @@ public class GameManager : MonoBehaviour
 
     public void SpawnFood()
     {
-        // Если еда уже существует, не создаём новую
         if (currentFood == null)
         {
             GameObject foodItemPrefab = foodPrefabs[Random.Range(0, foodPrefabs.Length)];
@@ -102,13 +111,14 @@ public class GameManager : MonoBehaviour
         return false; // Не удалось улучшить
     }
 
-    public bool UpgradeAutoClick()
+    public bool UpgradeAutoIncome()
     {
-        if (autoClickCount < 10 && food >= autoClickUpgradeCost)
+        if (autoIncomeCount < 10 && food >= autoIncomeUpgradeCost) // Максимум 10 улучшений
         {
-            food -= autoClickUpgradeCost;
-            autoClickCount++;
-            autoClickUpgradeCost *= 10; // Увеличиваем стоимость следующего улучшения
+            food -= autoIncomeUpgradeCost; // Уменьшаем количество еды на стоимость улучшения
+            autoIncome *= 2; // Увеличиваем автоматический доход
+            autoIncomeCount++; // Увеличиваем счетчик автоматического дохода
+            autoIncomeUpgradeCost *= 2; // Увеличиваем стоимость следующего улучшения
             return true; // Успешное улучшение
         }
         return false; // Не удалось улучшить
@@ -116,10 +126,13 @@ public class GameManager : MonoBehaviour
 
     public bool UpgradeFoodMultiplier()
     {
+        // Здесь можно добавить логику, например, увеличивать количество еды, получаемое с клика
         if (food >= foodMultiplierUpgradeCost)
         {
             food -= foodMultiplierUpgradeCost; // Уменьшаем еду на стоимость
             foodMultiplierUpgradeCost *= 2; // Увеличиваем стоимость следующего улучшения
+            // Например, увеличиваем количество еды, получаемое при клике
+            // Здесь нужно добавить соответствующую логику, если требуется
             return true; // Успешное улучшение
         }
         return false; // Не удалось улучшить
